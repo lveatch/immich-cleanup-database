@@ -1,0 +1,158 @@
+#!/usr/bin/perl
+
+use Getopt::Long;
+use Data::Dumper;
+
+my $backupPath = '/data/backups';
+my $backupFile = '';
+my $newBackupFile = 'new.sql';
+my $missingFile = 'missing.log';
+
+my $result = GetOptions (
+                           "backupPath=s" => \$backupPath,
+                           "backupFile=s" => \$backupFile,
+                           "newBackupFile=s" => \$newBackupFile,
+                           "missingFile=s" => \$missingFile,
+                        ) or die("Error in command line arguments\n");
+
+
+open (Missing, '>', "$backupPath/$missingFile") or die "cannot open $backupPath/$missingFile for write, $!\n";
+
+my %missingId;
+
+my @tableColumnNames;
+my @genericTable = qw(id assetId);
+my @asset_table = qw(id deviceAssetId ownerId deviceId type path);
+my @asset_file_table = qw(id assetId createdAt updatedAt type path);
+
+my $idCheck = 'assetId';
+my $table = '';
+
+my $sqlBackup = "$backupPath/$backupFile";
+open (Backup, "zcat --stdout $sqlBackup | ") or die "cannot open $sqlBackup file, $!\n";
+
+while (my $line = <Backup>) {
+   chomp $line;
+
+   if ($line =~ m/^COPY / .. $line =~ m/^--/) { # only process COPY data rows
+      next if ($line eq '');
+      next if ($line =~ m/^\\./);
+      next if ($line =~ m/^--/);
+
+      # COPY public.activity (id, "createdAt", "updatedAt", "albumId", "userId", "assetId", comment, "isLiked", "updateId") FROM stdin;
+      if ($line =~ m/^COPY public\.(.+?) \((.+)\) FROM/) {
+         $table = $1;
+         print "\tprocessing $table\n";
+
+         (my $columnText = $2) =~ s/"//g;
+         $columnText =~ s/\s//g;
+         $columnText =~ s/originalPath/path/;
+         @tableColumnNames = split(/,/, $columnText);
+
+         $idCheck = '';
+         if ($line =~ m/"assetId",/) {
+            $idCheck = 'assetId';
+         } elsif ($line =~ m/id,/) {
+            $idCheck = 'id';
+         }
+         next;
+      }
+
+      next if ($idCheck eq '');
+
+      if ($table eq 'asset_file') {
+         my %tableFields;
+         @tableFields{@tableColumnNames} = split(/\t/, $line);
+
+         my $location = $tableFields{'path'};
+         unless (-e "$location") {
+            next if (exists $missingId{ $tableFields{$idCheck} });
+            $missingId{ $tableFields{$idCheck} } = 1;
+            print Missing "$idCheck\t$tableFields{$idCheck}\t$tableFields{'path'}\t$table\n";
+         }
+
+      } elsif ($table eq 'asset') {
+         my %tableFields;
+         @tableFields{@tableColumnNames} = split(/\t/, $line);
+
+         next if ($tableFields{'deviceId'} eq 'Library Import');
+
+         my $location = $tableFields{'path'};
+         unless (-e "$location") {
+            next if (exists $missingId{ $tableFields{$idCheck} });
+            $missingId{ $tableFields{$idCheck} } = 1;
+            print Missing "$idCheck\t$tableFields{$idCheck}\t$tableFields{'path'}\t$table\n";
+         }
+
+      }
+
+   }
+
+}
+
+close Backup;
+
+my $missingAssets = keys %missingId;
+print "\n\nmissing assets = $missingAssets\n\n";
+
+if ($missingAssets == 0) {
+   print "\nexiting. no missing assets found.\n\n";
+   exit 0;
+}
+
+open (NewBackupFile, '>', "$backupPath/$newBackupFile") or die "cannot open $backupPath/$newBackupFile for write, $!\n";
+
+open (Backup, "zcat --stdout $sqlBackup | ") or die "cannot open $sqlBackup file, $!\n";
+$idCheck = '';
+
+while (my $line = <Backup>) {
+   chomp $line;
+
+   if ($line =~ m/^COPY / .. $line =~ m/^--/) { # only process COPY data rows
+
+      if ($line =~ m/^COPY public\.(.+?) \((.+)\) FROM/) {
+         print NewBackupFile "$line\n";
+         $table = $1;
+         #print "\tfiltering $table\n";
+
+         (my $columnText = $2) =~ s/"//g;
+         $columnText =~ s/\s//g;
+         $columnText =~ s/originalPath/path/;
+         #print "\t\tcolumn text = $columnText\n";
+         @tableColumnNames = split(/,/, $columnText);
+
+         $idCheck = '';
+         if ($line =~ m/"assetId",/) {
+            $idCheck = 'assetId';
+         } elsif ($line =~ m/id,/) {
+            $idCheck = 'id';
+         }
+         next;
+      }
+
+      if ($idCheck eq '') {
+         print NewBackupFile "$line\n";
+         next;
+      }
+
+      my %tableFields;
+      @tableFields{@tableColumnNames} = split(/\t/, $line);
+
+      if (exists $missingId{ $tableFields{$idCheck} }) {
+         next;
+      } else {
+         print NewBackupFile "$line\n";
+      }
+
+   } else {
+      print NewBackupFile "$line\n";
+   }
+
+}
+
+close Backup;
+close Missing;
+close NewBackupFile;
+
+exit 0;
+
