@@ -5,7 +5,7 @@ use Data::Dumper;
 
 my $backupPath = '/data/backups';
 my $backupFile = '';
-my $newBackupFile = 'new.sql';
+my $newBackupFile = '';
 my $missingFile = 'missing.log';
 
 my $result = GetOptions (
@@ -19,16 +19,15 @@ my $result = GetOptions (
 open (Missing, '>', "$backupPath/$missingFile") or die "cannot open $backupPath/$missingFile for write, $!\n";
 
 my %missingId;
-
 my @tableColumnNames;
-my @genericTable = qw(id assetId);
-my @asset_table = qw(id deviceAssetId ownerId deviceId type path);
-my @asset_file_table = qw(id assetId createdAt updatedAt type path);
-
 my $idCheck = 'assetId';
 my $table = '';
 
 my $sqlBackup = "$backupPath/$backupFile";
+if ($newBackupFile eq '') {
+   ($newBackupFile = $backupFile) =~ s/\.gz$/.orphanfix.sql/;
+}
+
 open (Backup, "zcat --stdout $sqlBackup | ") or die "cannot open $sqlBackup file, $!\n";
 
 while (my $line = <Backup>) {
@@ -113,12 +112,10 @@ while (my $line = <Backup>) {
       if ($line =~ m/^COPY public\.(.+?) \((.+)\) FROM/) {
          print NewBackupFile "$line\n";
          $table = $1;
-         #print "\tfiltering $table\n";
 
          (my $columnText = $2) =~ s/"//g;
          $columnText =~ s/\s//g;
          $columnText =~ s/originalPath/path/;
-         #print "\t\tcolumn text = $columnText\n";
          @tableColumnNames = split(/,/, $columnText);
 
          $idCheck = '';
@@ -153,6 +150,14 @@ while (my $line = <Backup>) {
 close Backup;
 close Missing;
 close NewBackupFile;
+
+print "\n\ncompressing new backup file -> '$backupPath/$newBackupFile'\n";
+
+open (Zip, "gzip --keep '$backupPath/$newBackupFile' | ") or die "cannot open $newBackupFile file, $!\n";
+while (my $line = <Zip>) {
+   print $line;
+}
+close Zip;
 
 exit 0;
 
