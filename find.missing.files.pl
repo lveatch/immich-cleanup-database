@@ -7,12 +7,14 @@ my $backupPath = '/data/backups';
 my $backupFile = '';
 my $newBackupFile = '';
 my $missingFile = 'missing.log';
+my $test;
 
 my $result = GetOptions (
                            "backupPath=s" => \$backupPath,
                            "backupFile=s" => \$backupFile,
                            "newBackupFile=s" => \$newBackupFile,
                            "missingFile=s" => \$missingFile,
+                           "test"      => \$test,
                         ) or die("Error in command line arguments\n");
 
 
@@ -63,8 +65,9 @@ while (my $line = <Backup>) {
          my %tableFields;
          @tableFields{@tableColumnNames} = split(/\t/, $line);
 
-         my $location = $tableFields{'path'};
-         unless (-e "$location") {
+         next if ($tableFields{'type'} eq 'sidecar');
+
+         unless (-e "$tableFields{'path'}") {
             next if (exists $missingId{ $tableFields{$idCheck} });
             $missingId{ $tableFields{$idCheck} } = 1;
             print Missing "$idCheck\t$tableFields{$idCheck}\t$tableFields{'path'}\t$table\n";
@@ -74,10 +77,10 @@ while (my $line = <Backup>) {
          my %tableFields;
          @tableFields{@tableColumnNames} = split(/\t/, $line);
 
-         next if ($tableFields{'deviceId'} eq 'Library Import');
+         #next if ($tableFields{'deviceId'} eq 'Library Import');
+         next unless ($tableFields{'deviceId'} eq 'WEB');
 
-         my $location = $tableFields{'path'};
-         unless (-e "$location") {
+         unless (-e "$tableFields{'path'}") {
             next if (exists $missingId{ $tableFields{$idCheck} });
             $missingId{ $tableFields{$idCheck} } = 1;
             print Missing "$idCheck\t$tableFields{$idCheck}\t$tableFields{'path'}\t$table\n";
@@ -112,18 +115,23 @@ while (my $line = <Backup>) {
       if ($line =~ m/^COPY public\.(.+?) \((.+)\) FROM/) {
          print NewBackupFile "$line\n";
          $table = $1;
+         print "\tfiltering $table\n";
 
          (my $columnText = $2) =~ s/"//g;
          $columnText =~ s/\s//g;
          $columnText =~ s/originalPath/path/;
+         #print "\t\tcolumn text = $columnText\n";
          @tableColumnNames = split(/,/, $columnText);
 
          $idCheck = '';
-         if ($line =~ m/"assetId",/) {
-            $idCheck = 'assetId';
+         if ($line =~ m/"albumThumbnailAssetId",/) {
+            $idCheck = 'albumThumbnailAssetId';
+         } elsif ($line =~ m/"assetId",/) {
+               $idCheck = 'assetId';
          } elsif ($line =~ m/id,/) {
             $idCheck = 'id';
          }
+         #print "\t\t\tid check is $idCheck\n";
          next;
       }
 
@@ -160,4 +168,3 @@ while (my $line = <Zip>) {
 close Zip;
 
 exit 0;
-
