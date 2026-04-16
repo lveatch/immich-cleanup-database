@@ -144,6 +144,10 @@ while (my $line = <Backup>) {
       @tableFields{@tableColumnNames} = split(/\t/, $line);
 
       if (exists $missingId{ $tableFields{$idCheck} }) {
+         if ($idCheck eq 'albumThumbnailAssetId') {
+            $line =~ s/$tableFields{$idCheck}/\\N/;
+            print NewBackupFile "$line\n";
+         }
          next;
       } else {
          print NewBackupFile "$line\n";
@@ -158,6 +162,8 @@ while (my $line = <Backup>) {
 close Backup;
 close Missing;
 close NewBackupFile;
+
+exit 0 if ($test);
 
 print "\n\ncompressing new backup file -> '$backupPath/$newBackupFile'\n";
 
