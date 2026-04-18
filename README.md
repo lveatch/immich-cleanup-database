@@ -22,9 +22,9 @@ Simply copy the Perl script to ${UPLOAD_LOCATION}/backups
 
 > docker container exec -it immich_server bash -c  "perl  /data/backups/find.missing.files.pl  -backupFile immich-db-backup-20260210T020000-v2.3.1-pg14.18.sql.gz"
 
-The newly created sql file and compressed file will append .orphanfix to their file names for clear identification.
+The newly created sql file will append .orphanfix to their file names for clear identification.
 
-Back in the Immich UI, perform a database restore.
+Back in the Immich UI, perform a database restore - no need to gzip the sql file.
 
 ## Sample output
 
