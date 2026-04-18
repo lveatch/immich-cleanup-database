@@ -95,9 +95,138 @@ Back in the Immich UI, perform a database restore.
         processing workflow_filter
 
 
- missing assets = 1949
+looking for foreign keys and related table columns
+        crossrefferencing activity
+        crossrefferencing album
+                changed albumThumbnailAssetId (0d87a138-7d4e-419a-847e-9de5fe78121f) to null
+        crossrefferencing album_asset
+        crossrefferencing album_asset_audit
+        crossrefferencing album_audit
+        crossrefferencing album_user
+        crossrefferencing album_user_audit
+        crossrefferencing api_key
+        crossrefferencing asset
+        crossrefferencing asset_audit
+        crossrefferencing asset_edit
+        crossrefferencing asset_edit_audit
+        crossrefferencing asset_exif
+        crossrefferencing asset_face
+        crossrefferencing asset_face_audit
+        crossrefferencing asset_file
+        crossrefferencing asset_job_status
+        crossrefferencing asset_metadata
+        crossrefferencing asset_metadata_audit
+        crossrefferencing asset_ocr
+        crossrefferencing audit
+        crossrefferencing face_search
+        crossrefferencing geodata_places
+        crossrefferencing kysely_migrations
+        crossrefferencing kysely_migrations_lock
+        crossrefferencing library
+        crossrefferencing memory
+        crossrefferencing memory_asset
+        crossrefferencing memory_asset_audit
+        crossrefferencing memory_audit
+        crossrefferencing migration_overrides
+        crossrefferencing migrations
+        crossrefferencing move_history
+        crossrefferencing naturalearth_countries
+        crossrefferencing notification
+        crossrefferencing ocr_search
+        crossrefferencing partner
+        crossrefferencing partner_audit
+        crossrefferencing person
+        crossrefferencing person_audit
+        crossrefferencing plugin
+        crossrefferencing plugin_action
+        crossrefferencing plugin_filter
+        crossrefferencing session
+        crossrefferencing session_sync_checkpoint
+        crossrefferencing shared_link
+        crossrefferencing shared_link_asset
+        crossrefferencing smart_search
+        crossrefferencing stack
+        crossrefferencing stack_audit
+        crossrefferencing system_metadata
+        crossrefferencing tag
+        crossrefferencing tag_asset
+        crossrefferencing tag_closure
+        crossrefferencing typeorm_metadata
+        crossrefferencing "user"
+        crossrefferencing user_audit
+        crossrefferencing user_metadata
+        crossrefferencing user_metadata_audit
+        crossrefferencing version_history
+        crossrefferencing workflow
+        crossrefferencing workflow_action
+        crossrefferencing workflow_filter
+missing assets = 16
 
- compressing new backup file -> '/data/backups/immich-db-backup-20260415T130000-v2.7.5-pg14.19.sql.orphanfix.sql'
+        filtering activity
+        filtering album
+                changed albumThumbnailAssetId (0d87a138-7d4e-419a-847e-9de5fe78121f) to null
+        filtering album_asset
+        filtering album_asset_audit
+        filtering album_audit
+        filtering album_user
+        filtering album_user_audit
+        filtering api_key
+        filtering asset
+        filtering asset_audit
+        filtering asset_edit
+        filtering asset_edit_audit
+        filtering asset_exif
+        filtering asset_face
+        filtering asset_face_audit
+        filtering asset_file
+        filtering asset_job_status
+        filtering asset_metadata
+        filtering asset_metadata_audit
+        filtering asset_ocr
+        filtering audit
+        filtering face_search
+        filtering geodata_places
+        filtering kysely_migrations
+        filtering kysely_migrations_lock
+        filtering library
+        filtering memory
+        filtering memory_asset
+        filtering memory_asset_audit
+        filtering memory_audit
+        filtering migration_overrides
+        filtering migrations
+        filtering move_history
+        filtering naturalearth_countries
+        filtering notification
+        filtering ocr_search
+        filtering partner
+        filtering partner_audit
+        filtering person
+        filtering person_audit
+        filtering plugin
+        filtering plugin_action
+        filtering plugin_filter
+        filtering session
+        filtering session_sync_checkpoint
+        filtering shared_link
+        filtering shared_link_asset
+        filtering smart_search
+        filtering stack
+        filtering stack_audit
+        filtering system_metadata
+        filtering tag
+        filtering tag_asset
+        filtering tag_closure
+        filtering typeorm_metadata
+        filtering "user"
+        filtering user_audit
+        filtering user_metadata
+        filtering user_metadata_audit
+        filtering version_history
+        filtering workflow
+        filtering workflow_action
+        filtering workflow_filter
+
 </pre>
 
 ## Backing out the change.
