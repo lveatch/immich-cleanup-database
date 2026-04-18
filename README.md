@@ -16,7 +16,7 @@ A new backup sql file is written and then gzipped. You must manually perform the
 Simply copy the Perl script to ${UPLOAD_LOCATION}/backups
 
 ## Executing
-1. Make a new manual backup of your database.
+1. Ensure you have a recent backup of your database. Please note, that the database restore process will make a restore-point backup for you.
 2. Once logged/ssh'd into your Immich docker host, execute the following command providing minimally the backup file name.
    - add <code>-backupPath /data/backups</code> if you have a different backup location.
 
