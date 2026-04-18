@@ -89,7 +89,6 @@ close Backup;
 
 print "\n\nlooking for foreign keys and related table columns\n";
 findRelatedIds();
-print Dumper(%missingId);
 
 my $missingAssets = keys %missingId;
 print "\n\nmissing assets = $missingAssets\n\n";
