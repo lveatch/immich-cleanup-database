@@ -3,7 +3,8 @@ This Perl script is to identify missing Immich files still found with in the Imm
 
 External Library's are not supported as they should automatically keep the database clean.
 
-!!! Please test on a non-production Immich installation before running on your productive environment.
+> [!WARNING]
+> Please test on a non-production Immich installation before running on your productive environment.
 
 ## Overview
 This script will identify orphand files by inspecting the built-in database backup file and create a new unzipped and zipped backup sql file which can then be used as a database restore removing all orphanded assets.
@@ -18,17 +19,17 @@ Simply copy the Perl script to ${UPLOAD_LOCATION}/backups
 ## Executing
 1. Ensure you have a recent backup of your database. Please note, that the database restore process will make a restore-point backup for you.
 2. Once logged/ssh'd into your Immich docker host, execute the following command providing minimally the backup file name.
-   - add <code>-backupPath /data/backups</code> if you have a different backup location.
-
-> docker container exec -it immich_server bash -c  "perl  /data/backups/find.missing.files.pl  -backupFile immich-db-backup-20260210T020000-v2.3.1-pg14.18.sql.gz"
+   * `docker container exec -it immich_server bash -c  "perl  /data/backups/find.missing.files.pl  -backupFile immich-db-backup-20260210T020000-v2.3.1-pg14.18.sql.gz"`
+   * add `-backupPath /data/backups` if you have a different backup location.
 
 The newly created sql file will append .orphanfix to their file names for clear identification.
 
-Back in the Immich UI, perform a database restore - no need to gzip the sql file.
+Back in the Immich UI, perform a [database restore](https://docs.immich.app/administration/backup-and-restore/#restoring-a-database-backup) - no need to gzip the sql file.
 
 ## Sample output
 
-<pre>docker container exec -it immich_server bash -c  "perl /data/backups/find.missing.files.pl -backupPath /data/backups -backupFile immich-db-backup-20260415T130000-v2.7.5-pg14.19.sql.gz"
+```
+docker container exec -it immich_server bash -c  "perl /data/backups/find.missing.files.pl -backupPath /data/backups -backupFile immich-db-backup-20260415T130000-v2.7.5-pg14.19.sql.gz"
    
         processing activity
         processing album
@@ -227,7 +228,7 @@ missing assets = 16
         filtering workflow_action
         filtering workflow_filter
 
-</pre>
+```
 
 ## Backing out the change.
 Simply perform another database restore using the backup manually taken before performing this procedure.
